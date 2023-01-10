@@ -1,0 +1,102 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load account socialaccount %}
+
+{# Load the tag library #}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+
+{% get_providers as socialaccount_providers %}
+
+
+<ul class="nav nav-tabs nav-fill">
+    <li class="nav-item">
+        <a class="nav-link active disabled" aria-current="page" href="{{ login_url }}">登入</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link disabled" href="{{ signup_url }}">註冊</a>
+    </li>
+</ul>
+
+<form class="login" method="POST" action="{% url 'account_login' %}">
+    {% csrf_token %}
+
+    <label for="id_login" class="form-label">帳號：</label>
+    <div class="input-group">
+        <span class="input-group-text">
+            <i class="bi bi-person-fill"></i>
+        </span>
+        <input type="text" class="form-control" name="login" placeholder="使用者名稱或電子郵件" autocomplete="email"
+            maxlength="150" required="" id="id_login">
+    </div>
+
+    {% if form.errors.login %}
+    <p class="lh-1 text-danger">
+        {% for err in form.errors.login %}
+        ‧{{ err }} <br>
+        {% endfor %}
+    </p>
+    {% else %}
+    <br>
+    {% endif %}
+
+    <label for="id_password" class="form-label">密碼：</label>
+    <div class="input-group">
+        <span class="input-group-text">
+            <i class="bi bi-lock-fill"></i>
+        </span>
+        <input type="password" class="form-control" name="password" placeholder="密碼" autocomplete="current-password"
+            required="" id="id_password">
+    </div>
+
+    {% if form.errors.password %}
+    <p class="lh-1 text-danger">
+        {% for err in form.errors.password %}
+        ‧{{ err }} <br>
+        {% endfor %}
+    </p>
+    {% else %}
+    <br>
+    {% endif %}
+
+
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+
+    <div class="d-flex justify-content-between align-items-top mb-4">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="remember" id="id_remember">
+            <label class="form-check-label mb-0" for="id_remember">記住我</label>
+        </div>
+        <div>
+            <a href="{% url 'account_reset_password' %}" class="small text-right text-decoration-none text-body">
+                {% trans "Forgot Password?" %}</a>
+        </div>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="non-field-errors">
+        {% for err in form.non_field_errors %}
+        <p class="form-error text-danger">{{ err }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">{% trans "Sign In" %}</button>
+    </div>
+
+</form>
+
+{% if socialaccount_providers %}
+<br>
+{% include "socialaccount/snippets/provider_list.html" with process="login" %}
+
+{% include "socialaccount/snippets/login_extra.html" %}
+{% endif %}
+{% endblock %}

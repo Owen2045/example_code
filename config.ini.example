@@ -1,0 +1,7 @@
+[104]
+land_lbor_progress = 0
+building_lbor_progress = 0
+
+[104tp]
+land_tp_progress = 0
+building_tp_progress = 0

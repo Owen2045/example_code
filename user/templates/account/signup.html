@@ -1,0 +1,116 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+
+{% block content %}
+{% get_providers as socialaccount_providers %}
+<ul class="nav nav-tabs nav-fill">
+  <li class="nav-item">
+    <a class="nav-link" href="{{ login_url }}">登入</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active disabled" aria-current="page" href="{{ signup_url }}">註冊</a>
+  </li>
+</ul>
+
+<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+  {% csrf_token %}
+
+  <label for="id_email" class="form-label">電子郵件：</label>
+  <div class="input-group">
+    <span class="input-group-text">
+      <i class="bi bi-envelope-fill"></i>
+    </span>
+    <input type="text" class="form-control" name="email" placeholder="電子郵件地址" autocomplete="email" maxlength="150"
+      required="" id="id_email">
+  </div>
+
+  {% if form.errors.email %}
+  <p class="lh-1 text-danger">
+    {% for err in form.errors.email %}
+    ‧{{ err }} <br>
+    {% endfor %}
+  </p>
+  {% else %}
+  <br>
+  {% endif %}
+
+  <label for="id_username" class="form-label">帳號：</label>
+  <div class="input-group">
+    <span class="input-group-text">
+      <i class="bi bi-person-fill"></i>
+    </span>
+    <input type="text" class="form-control" name="username" placeholder="使用者名稱" autocomplete="username" maxlength="150"
+      required="" id="id_username">
+  </div>
+
+  {% if form.errors.username %}
+  <p class="lh-1 text-danger">
+    {% for err in form.errors.username %}
+    ‧{{ err }} <br>
+    {% endfor %}
+  </p>
+  {% else %}
+  <br>
+  {% endif %}
+
+
+  <label for="id_password1" class="form-label">密碼：</label>
+  <div class="input-group">
+    <span class="input-group-text">
+      <i class="bi bi-lock-fill"></i>
+    </span>
+    <input type="password" class="form-control" name="password1" placeholder="密碼" autocomplete="new-password"
+      required="" id="id_password1">
+  </div>
+
+
+  {% if form.errors.password1 %}
+  <p class="lh-1 text-danger">
+    {% for err in form.errors.password1 %}
+    ‧{{ err }} <br>
+    {% endfor %}
+  </p>
+  {% else %}
+  <br>
+  {% endif %}
+
+  <label for="id_password2" class="form-label">密碼(重複)</label>
+  <div class="input-group">
+    <span class="input-group-text">
+      <i class="bi bi-lock-fill"></i>
+    </span>
+    <input type="password" class="form-control" name="password2" placeholder="密碼" autocomplete="new-password"
+      required="" id="id_password2">
+  </div>
+
+  <br>
+  {% if redirect_field_value %}
+  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+  {% endif %}
+
+  {% if form.non_field_errors %}
+  <div class="non-field-errors">
+    {% for err in form.non_field_errors %}
+    <p class="form-error text-danger">{{ err }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="d-grid gap-2">
+    <button type="submit" class="btn btn-primary">{% trans "Sign Up" %}</button>
+  </div>
+</form>
+
+{% if socialaccount_providers %}
+<br>
+{% include "socialaccount/snippets/provider_list.html" with process="login" %}
+
+{% include "socialaccount/snippets/login_extra.html" %}
+{% endif %}
+
+{% endblock %}

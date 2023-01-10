@@ -1,0 +1,494 @@
+{% load pdf_extras %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+
+    <title>元宏電傳</title>
+    <style>
+        body {
+            font-family: STSong-Light;
+            font-size: 14px;
+            display: flex;
+        }
+
+
+        @page {
+            size: a4;
+
+            @frame header_frame {
+                -pdf-frame-content: header_content;
+                left: 50pt;
+                width: 495pt;
+                top: 30pt;
+                height: 80pt;
+                /* -pdf-frame-border: 1; */
+            }
+
+            @frame content_frame {
+                left: 50pt;
+                width: 495pt;
+                top: 110pt;
+                height: 700pt;
+                /* -pdf-frame-border: 1; */
+            }
+        }
+
+        .title_left {
+            text-align: left;
+            /* float: right */
+        }
+
+        .title_center {
+            text-align: center;
+        }
+
+        .title_right {
+            text-align: right;
+        }
+
+        .nowrap {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header_content">
+        <table>
+            <tr>
+                <th colspan="2">
+                    <font size="5">建物登記第二類(建號{{ tp_type }})<br>{{ city_name }}{{ area_name }}{{ region_name }}{{ lbno }}建號</font>
+                </th>
+            </tr>
+            <tr></tr>
+            <tr>
+                <td align="left"> 列印時間：{{ chinese_time }}</td>
+                <td align="right"> 頁次：<pdf:pagenumber> / <pdf:pagecount>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="content_frame">
+        {% if mark %}
+        <table>
+            <tr>
+                <th>
+                    <font size="5" class="title_left">***********************</font>
+                </th>
+                <th>
+                    <font size="5">建物標示部</font>
+                </th>
+                <th>
+                    <font size="5" class="title_right">***********************</font>
+                </th>
+            </tr>
+        </table>
+        <br>
+        <table>
+            <tr>
+                <td colspan="2">
+                    登記日期：{{ mark.reg_date_original | add_head:"民國" }}
+                </td>
+                <td  colspan="2">
+                    登記原因：{{ mark.reg_reason }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    建物門牌：{{ mark.door_number }}
+                </td>
+            </tr>
+            {% if mark.locate_lkey %}
+            <tr>
+                <td colspan="4">
+                    建物坐落地號：{% locate_lbkey mark.locate_lkey 8 %}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if mark.main_purpose %}
+            <tr>
+                <td colspan="4">
+                    主要用途：{{ mark.main_purpose}}
+                </td>
+            </tr>
+            {% endif %}
+
+            <tr>
+                <td colspan="4">
+                    主要建材：{{ mark.material}}
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    層 數：{{ mark.floor_num_str}}
+                </td>
+                <td colspan="2">
+                    總面積：{{ mark.total_area }}平方公尺
+                </td>
+            </tr>
+
+            {% for attach in mark.building_floor %}
+            <tr>
+                <td colspan="1">
+                    {% if attach == mark.building_floor.0 %}
+                    層 次：
+                    {% endif %}
+                </td>
+                <td colspan="1">
+                    {{ attach.title }}
+                </td>
+                <td colspan="2">
+                    層次面積：{{ attach.area }}平方公尺
+                </td>
+            </tr>
+            {% endfor %}
+
+            <tr>
+                <td colspan="4">
+                    建築完成日期：{{ mark.build_date_str | add_head:"民國" }}
+                </td>
+            </tr>
+
+            {% for attach in mark.building_attach %}
+            <tr>
+                <td colspan="1">
+                    {% if attach == mark.building_attach.0 %}
+                    附屬建物用途：
+                    {% endif %}
+                </td>
+                <td colspan="1">
+                    {{ attach.title }}
+                </td>
+                <td colspan="2">
+                    層次面積：{{ attach.area }}平方公尺
+                </td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4">
+                    其他登記事項：{{ mark.other_remark_str | other_remark }}
+                </td>
+            </tr>
+
+            {% if is_query_time %}
+            <tr>
+                <td colspan="4">
+                    查詢時間：{{ mark.query_time|time_format }}
+                </td>
+            </tr>
+            {% endif %}
+
+            <tr>
+                <td colspan="4">
+                </td>
+            </tr>
+        </table>
+        {% endif %}
+
+        {% if owners %}
+        <table>
+            <tr>
+                <th>
+                    <font size="5" class="title_left">***********************</font>
+                </th>
+                <th>
+                    <font size="5">建物所有權部</font>
+                </th>
+                <th>
+                    <font size="5" class="title_right">***********************</font>
+                </th>
+            </tr>
+        </table>
+        <br>
+        <table>
+            {% for owner in owners %}
+            <tr>
+                <td colspan="4">
+                    ({{ forloop.counter|stringformat:"04d" }}) 登記次序：{{ owner.regno }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    登記日期：{{ owner.reg_date_original }}
+                </td>
+                <td colspan="2">
+                    登記原因：{{ owner.reg_reason }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    原因發生日期：{{ owner.reg_date_original }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    &nbsp;所有權人：{{ owner.name }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    &nbsp;統一編號：{{ owner.uid }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    &nbsp;住&nbsp;&nbsp;址：{% strNewline owner.address 42 7 %}
+                </td>
+            </tr>
+
+            {% if owner.admin %}
+            {% for data in owner.admin %}
+            <tr>
+                <td colspan="4">
+                    &nbsp;管理者&nbsp;：{{ data.姓名 }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    &nbsp;統一編號：{{ data.統一編號 }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    {% if data.地址 %}
+                    &nbsp;住&nbsp;&nbsp;址：{% strNewline data.地址 42 7 %}
+                    {% else %}
+                    &nbsp;住&nbsp;&nbsp;址：(空白)
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+
+            <tr>
+                <td colspan="4">
+                    權利範圍：{{ owner.right_str }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    權狀字號：{{ owner.cert_id }}
+                </td>
+            </tr>
+
+            {% if owner.related_creditor_regno %}
+            <tr>
+                <td colspan="4">
+                    相關他項權利登記次序：{{ owner.related_creditor_regno | join:' '}}
+                </td>
+            </tr>
+            {% endif %}
+
+            <tr>
+                <td colspan="4">
+                    其他登記事項：{{ owner.other_remark_str | other_remark }}
+                </td>
+            </tr>
+            {% if is_query_time %}
+            <tr>
+                <td colspan="4">
+                    查詢時間：{{ owner.query_time|time_format }}
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td colspan="4">
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if rights %}
+        <table>
+            <tr>
+                <th>
+                    <font size="5" class="title_left">***********************</font>
+                </th>
+                <th>
+                    <font size="5">建物他項權利部</font>
+                </th>
+                <th>
+                    <font size="5" class="title_right">***********************</font>
+                </th>
+            </tr>
+        </table>
+        <br>
+        <table>
+            {% for right in rights %}
+            <tr>
+                <td colspan="2">
+                    ({{ forloop.counter|stringformat:"04d" }}) 登記次序：{{ right.regno }}
+                </td>
+                <td colspan="2">
+                    權利種類：{{ right.right_type }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    收件年期：民國{{ right.setting_doc_id | split_data:0}}
+                </td>
+                <td colspan="2">
+                    字號：{{ right.setting_doc_id | split_data:1}}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    登記日期：民國{{ right.reg_date_original }}
+                </td>
+                <td colspan="2">
+                    登記原因：{{ right.reg_reason }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    &nbsp;權利人&nbsp;：{{ right.name }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    &nbsp;統一編號：{{ right.uid }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    &nbsp;住&nbsp;&nbsp;址：{% strNewline right.address 42 7 %}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    債權額比例：{{ right.obligation_str }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    擔保債權總金額：{{ right.guarantee_amount_str }}
+                </td>
+            </tr>
+
+            {% if right.guarantee_type_range %}
+            <tr>
+                <td colspan="4">
+                    擔保債權種類及範圍：{% strNewline right.guarantee_type_range 38 11 %}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if right.guarantee_date_str %}
+            <tr>
+                <td colspan="4">
+                    擔保債權確定期日：{{ right.guarantee_date_str}}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if right.payoff_date_str != '　' and right.payoff_date_str %}
+            <tr>
+                <td colspan="4">
+                    清償日期：{{ right.payoff_date_str}}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if right.duration_str != '　　' and right.duration_str%}
+            <tr>
+                <td colspan="4">
+                    存續期間：{{ right.duration_str}}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if right.interest != '<' and right.interest %}
+            <tr>
+                <td colspan="4">
+                    利息(率)：{{ right.interest }}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if right.overdue_interest != '<' and right.overdue_interest %}
+            <tr>
+                <td colspan="4">
+                    延期利息(率)：{{ right.overdue_interest}}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if right.penalty != '<' and right.penalty %}
+            <tr>
+                <td colspan="4">
+                    違約金：{{ right.penalty}}
+                </td>
+            </tr>
+            {% endif %}
+
+            <tr>
+                <td colspan="4">
+                    權利標的：{{ right.right_target}}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    標的登記次序：{{ right.related_owner_regno | join:'&nbsp;'}}
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    設定權利範圍：{{ right.setting_right_str}}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    證明書字號：{{ right.right_cert_doc_id}}
+                </td>
+            </tr>
+
+            {% if right.collateral_lkey %}
+            <tr>
+                <td colspan="4">
+                    共同擔保地號：{{ right.collateral_lkey | collateral_lbkey }}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if right.collateral_bkey %}
+            <tr>
+                <td colspan="4">
+                    共同擔保建號：{{ right.collateral_bkey | collateral_lbkey }}
+                </td>
+            </tr>
+            {% endif %}
+
+            <tr>
+                <td colspan="4">
+                    其他登記事項：{{ right.other_remark_str | other_remark }}
+                </td>
+            </tr>
+            {% if is_query_time %}
+            <tr>
+                <td colspan="4">
+                    查詢時間：{{ right.query_time|time_format }}
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td colspan="4">
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+        <br>
+        本查詢資料之處理及利用，申請人應注意依個人資料保護法第５條、第１９條、第２０條及第２９條規定辦理。<br>
+        本查詢資料有時間落差，實際應以地政事務所地籍資料庫記載為準。
+    </div>
+</body>
+
+</html>

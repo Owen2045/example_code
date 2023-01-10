@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}段小段查詢{% endblock title %}
+
+
+{% block content %}
+<h2>代碼更新</h2>
+<div class="btn-group">
+    <a href="/common/city_update/" type="button" class="update_car btn btn-outline-primary">縣市更新</a>
+    <a href="/common/land_code_update/" type="button" class="update_car btn btn-outline-primary">地代碼更新</a>
+</div>
+<br>
+<p>第一次使用時，需先點擊縣市更新，再點擊地代碼更新</p>
+
+{% endblock content %}
+
+{% block script %}
+<script>
+    $(document).on('click', '.update_car', function (e) {
+        e.preventDefault();
+        openYH()
+        url = $(this).attr('href')
+        clothes = $.get(url, function (data) {
+            alert(data.data);
+            closeYH();
+        }).fail(function () {
+            alert("連結異常");
+            closeYH();
+        });
+    })
+</script>
+{% endblock script %}

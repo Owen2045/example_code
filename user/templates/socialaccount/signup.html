@@ -1,0 +1,67 @@
+{% extends "socialaccount/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+<h1 class="text-center">{% trans "Sign Up" %}</h1>
+
+<p>
+  {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
+
+  您即將使用您的 {{provider_name}} 帳戶登錄 {{site_name}}。作為最後一步，請填寫以下表格：
+  {% endblocktrans %}
+</p>
+
+
+<form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
+  {% csrf_token %}
+
+  <label for="id_email" class="form-label">電子郵件：</label>
+  <div class="input-group">
+    <span class="input-group-text">
+      <i class="bi bi-envelope-fill"></i>
+    </span>
+    <input type="email" class="form-control" name="email" placeholder="電子郵件地址" autocomplete="email"
+      value="{{ form.email.value }}" maxlength="150" required="" id="id_email">
+  </div>
+  {% if form.errors.email %}
+  <p class="lh-1 text-danger">
+      {% for err in form.errors.email %}
+      ‧{{ err }} <br>
+      {% endfor %}
+  </p>
+  {% else %}
+  <br>
+  {% endif %}
+
+  <label for="id_username" class="form-label">帳號：</label>
+  <div class="input-group">
+    <span class="input-group-text">
+      <i class="bi bi-person-fill"></i>
+    </span>
+    <input type="text" class="form-control" name="username" placeholder="使用者名稱" autocomplete="username" maxlength="150"
+      required="" id="id_username">
+  </div>
+  {% if form.errors.username %}
+  <p class="lh-1 text-danger">
+      {% for err in form.errors.username %}
+      ‧{{ err }} <br>
+      {% endfor %}
+  </p>
+  {% else %}
+  <br>
+  {% endif %}
+
+  {% if redirect_field_value %}
+  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+  {% endif %}
+
+  <br>
+  <div class="d-grid gap-2">
+    <button type="submit" class="btn btn-primary">{% trans "Sign Up" %}</button>
+  </div>
+</form>
+
+{% endblock %}

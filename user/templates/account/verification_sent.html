@@ -1,0 +1,16 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Verify Your E-mail Address" %}{% endblock %}
+
+{% block content %}
+    <h1 class="text-center">{% trans "Verify Your E-mail Address" %}</h1>
+
+    <p>
+        我們已經向您發送了一封電子郵件進行驗證。按照提供的鏈接完成註冊過程。
+        如果您在主收件箱中沒有看到驗證電子郵件，請檢查您的垃圾郵件文件夾。
+        如果您在幾分鐘內沒有收到驗證電子郵件，請與我們聯繫。
+    </p>
+
+{% endblock %}

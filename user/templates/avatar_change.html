@@ -1,0 +1,28 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}頭像設定{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center">頭像設定</h1>
+
+
+<div class="text-center">
+    {% if user.userprofile.avatar %}
+    <img src="{{ user.userprofile.avatar.url }}" class="sticky-top rounded-pill" style="width: 100px; height: 100px">
+    {% else %}
+    <img src="https://secure.gravatar.com/avatar/{{ user.userprofile.user_token.hex }}?s=100&d=identicon"
+        class="sticky-top rounded-pill" style="width: 100px; height: 100px">
+    {% endif %}
+    <br>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">應用</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

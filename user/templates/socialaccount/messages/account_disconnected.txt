@@ -1,0 +1,2 @@
+{% load i18n %}
+{% blocktrans %}以解除第三方帳號連結{% endblocktrans %}

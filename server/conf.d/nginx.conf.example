@@ -1,0 +1,47 @@
+upstream django { 
+    # server 127.0.0.1:8000;
+    server unix:///var/www/html/lbor_v3/uwsgi.sock;
+}
+
+server {
+    # 本地測試用
+    server_name 127.0.0.1;
+    listen 80;
+    charset utf-8 ;
+
+    # server用
+    # # Domain names this server should respond to.
+    # server_name lbor.wsos.com.tw; # 替換您機器的IP地址或FQDN 
+    # charset utf-8 ;
+
+    # # Listen to port 443 on both IPv4 and IPv6.
+    # listen 443 ssl default_server reuseport;
+    # listen [::]:443 ssl default_server reuseport;
+
+    # # Load the certificate files.
+    # ssl_certificate         /etc/letsencrypt/live/test-name/fullchain.pem;
+    # ssl_certificate_key     /etc/letsencrypt/live/test-name/privkey.pem;
+    # ssl_trusted_certificate /etc/letsencrypt/live/test-name/chain.pem;
+
+    # # Load the Diffie-Hellman parameter.
+    # ssl_dhparam /etc/letsencrypt/dhparams/dhparam.pem;
+
+    # 最大上傳大小 
+    client_max_body_size 120M ;
+
+    # Django media 
+    location /media   { 
+        alias /var/www/html/lbor_v3/media ;   # 您的Django項目的媒體文件-根據需要進行修改
+    }
+
+    location /static { 
+        alias /var/www/html/lbor_v3/static ;  # 您的Django項目的靜態文件-根據需要進行修改 
+    }
+
+    # Finally, send all non-media requests to the Django server. 
+    location / { 
+        uwsgi_pass django ; 
+        include /var/www/html/lbor_v3/server/uwsgi_params ;  # the uwsgi_params file you installed 
+    } 
+
+}

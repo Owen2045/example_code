@@ -1,0 +1,105 @@
+version: "3.9"  # optional since v1.27.0
+
+volumes:
+  nginx_vol:
+  redis_vol:
+  rabbitmq_vol:
+
+services:
+  db:
+    image: mariadb:10.6.7
+    container_name: lbor_mariadb
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${PROJECT}
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "3304:3306"
+    volumes:
+      - ~/marindb/${PROJECT}:/var/lib/mysql:rw # 資料庫位置
+      - ~/data/${PROJECT}:/data # 資料備份使用
+      - ./server/my.cnf:/etc/mysql/my.cnf # 掛載配置文件
+
+  cache:
+    image: redis:7.0.2
+    container_name: lbor_redis
+    restart: always # always發生錯誤一直重啟
+    command: redis-server /etc/redis/redis.conf # 接著啟動redis服務器
+    volumes:
+      - redis_vol:/data # 通過掛載給redis數據備份
+      - ./server/redis.conf:/etc/redis/redis.conf # 掛載redis配置文件
+    # expose:
+    #   - 6379
+
+  rabbitmq:
+    image: rabbitmq:3.10.5-management
+    container_name: lbor_rabbitmq
+    restart: always
+    volumes:
+      - rabbitmq_vol:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=my_vhost
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    # expose:
+    #   - 5672
+
+  web:
+    # 建構 dockerfile 的位置
+    build: .
+    container_name: lbor_django
+    # 運行完最後執行的指令
+    command:
+      - sh
+      - -c
+      - |
+        python manage.py collectstatic --noinput && python manage.py migrate && uwsgi --emperor server/uwsgi.ini &
+        celery -A lbor_v3 beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler &
+        celery -A lbor_v3 flower -l info &
+        celery -A lbor_v3 worker -l INFO
+
+      # (django 主程式 debug模式 替換) python manage.py runserver 8000 &
+      # 1. (django 主程式) python manage.py collectstatic --noinput && python manage.py migrate && uwsgi --emperor server/uwsgi.ini &
+      # 2. celery 建立排程
+      # 3. celery flower 查看狀態
+      # 4. celery 任務執行
+
+    restart: always
+    # container的port號要綁定在主機端的port位置
+    # 主機:container
+    ports:
+      - "8000:8000"
+      - "5555:5555"
+    # 掛載設定
+    # : 之前的是實體位置，之後的是 container 內的位置
+    # 要完整目錄 可以對照Dockerfile寫的專案位置 
+    volumes:
+      - .:/var/www/html/${PROJECT}
+
+    # 來定義服務之間的依賴關係
+    # 但是depends_on不會等到db 和redis 容器 ready 再啟動
+    depends_on:
+      - db
+      - cache
+      - rabbitmq
+
+  nginx:  # debug模式 註解
+    build: ./server/.
+    container_name: lbor_nginx
+    restart: unless-stopped
+    env_file:
+      - ./server/nginx-certbot.env # certbot 設定
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - nginx_vol:/etc/letsencrypt # 憑證
+      - .:/var/www/html/${PROJECT} # 專案掛載 uwsgi 靜態文件
+
+    depends_on:
+      - db

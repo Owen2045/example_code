@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}統計資料{% endblock title %}
+
+
+{% block content %}
+<h2>統計</h2>
+
+跨日期取每日資料，選縣市行政區<br>
+不跨日取單天全資料
+
+<div class="row justify-content-md-center">
+    <div class="col-md-auto">
+        <input id="startDate" class="form-control" type="date" value="{{ start_date }}"/>
+    </div>
+    <div class="col-md-auto">
+        ~
+    </div>
+    <div class="col-md-auto">
+        <input id="endDate" class="form-control" type="date" value="{{ end_date }}"/>
+    </div>
+    <div class="col-md-auto">
+        <select class="form-select" id="queryType">
+            <option {% if queryType == '1' %}selected{% endif %} value="1">列表</option>
+            <option {% if queryType == '2' %}selected{% endif %} value="2">謄本</option>
+        </select>
+    </div>
+    <div class="col-md-auto">
+        <select class="form-select" id="city" onchange="onClickUpdateArea('city')">
+            <option {% if city == '' %}selected{% endif %} value="">全縣市</option>
+            {% for data in cityCodeTable %}
+            <option {% if city == data.city_code %}selected{% endif %} value="{{ data.city_code }}">{{ data.city_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-auto">
+        <select class="form-select" id="area">
+            <option selected value="">全行政區</option>
+        </select>
+    </div>
+    <div class="col-md-auto">
+        <button type="button" class="btn btn-outline-primary" onClick="date_query()">
+            查詢
+        </button>
+    </div>
+</div>
+
+<br>
+{% if msg or lb_data or ca_data%}
+    <h2>{{ city }} {{ area }} 統計資料</h2>
+{% endif %}
+
+{% if lb_data %}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">日期</th>
+            <th scope="col">土地</th>
+            <th scope="col">建物</th>
+            <th scope="col">總計</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in lb_data %}
+        <tr>
+            <th scope="row">{{ data.statistics_time }}</th>
+            <td>{{ data.l_sum }}</td>
+            <td>{{ data.b_sum }}</td>
+            <td>{{ data.l_sum | add:data.b_sum }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% elif ca_data and queryType == '1' %}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">日期</th>
+            <th scope="col">所有權增加</th>
+            <th scope="col">所有權減少</th>
+            <th scope="col">他項權增加</th>
+            <th scope="col">他項權減少</th>
+            <th scope="col">查詢總計</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in ca_data %}
+        <tr>
+            <th scope="row">{{ data.statistics_time }}</th>
+            <td>{{ data.owner_add_sum }}</td>
+            <td>{{ data.owner_rm_sum }}</td>
+            <td>{{ data.right_add_sum }}</td>
+            <td>{{ data.right_rm_sum }}</td>
+            <td>{{ data.query_sum }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% elif ca_data and queryType == '2' %}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">日期</th>
+            <th scope="col">所有權查詢筆數</th>
+            <th scope="col">他項權查詢筆數</th>
+            <th scope="col">地建號查詢筆數</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in ca_data %}
+        <tr>
+            <th scope="row">{{ data.statistics_time }}</th>
+            <td>{{ data.tp_o_sum }}</td>
+            <td>{{ data.tp_r_sum }}</td>
+            <td>{{ data.query_sum }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{{ msg }}
+{% endif %}
+
+
+
+
+{% endblock content %}
+
+{% block script %}
+<script>
+    function onClickUpdateArea(tag) {
+        var root = document.getElementById(tag);
+        var value = root.options[root.selectedIndex].value;
+        var Data = {
+            city: value
+        }
+        $.ajax({
+            type: "GET",
+            url: '/common/car/get_area/',
+            data: Data,
+            success: function (msg) {
+                updateAreas(msg);
+            }
+        });
+    }
+
+    function updateAreas(areas) {
+        var root = document.getElementById('area');
+        if (areas == {}) {
+            var options = '<option value="" selected="selected">全行政區</option>'
+            root.innerHTML = options
+        } else {
+            var options = '<option value="" selected="selected">全行政區</option>'
+            for (var key in areas) {
+                options += '<option value="' + areas[key].area_code + '">' + areas[key].area_name + '</option>'
+            }
+            root.innerHTML = options
+        }
+    }
+    
+    function date_query(q_type='') {
+        startDate = $("#startDate").val()
+        endDate = $("#endDate").val()
+        queryType = $("#queryType").val()
+        city = $("#city").val()
+        area = $("#area").val()
+
+        url = "/common/stats/?startDate=" + startDate
+        + '&endDate=' + endDate
+        + '&queryType=' + queryType
+        + '&city=' + city
+        + '&area=' + area
+        window.location.href = url
+    }
+
+    onClickUpdateArea('city')
+</script>
+{% endblock script %}
