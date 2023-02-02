@@ -14,51 +14,6 @@ import pytz
 
 tz = pytz.timezone(settings.TIME_ZONE)
 
-
-# 謄本用的序列器(棄用)
-class LandFeedbackTpSerializer(serializers.Serializer):
-    lbkey = serializers.CharField(default="A_01_0600_0000-0000", min_length=19, max_length=19)
-    # regno = serializers.CharField(default="0001", min_length=4, max_length=4)
-    # reg_date = serializers.DateField(default="2022-05-05")
-    # reg_reason = serializers.CharField(default="買賣", max_length=255)
-    # reason_date = serializers.DateField(default="2022-04-05")
-    # name = serializers.CharField(default="陳＊＊", max_length=255)
-    # uid = serializers.CharField(default="A123*****9", max_length=10)
-    # bday = serializers.DateField(default="1995-03-03", allow_null=True)
-    # address = serializers.CharField(default="新北市新莊區", max_length=255, allow_null=True)
-    # address_re = serializers.CharField(default="新北市新莊區", max_length=255, allow_null=True)
-    # admin = serializers.JSONField(default="{'@資料筆數': '0'}", allow_null=True)
-    # right_classify = serializers.ChoiceField(RightClassifyEnum.choices(), default=RightClassifyEnum.UNKNOWN)
-    # right_num = serializers.IntegerField(allow_null=True)
-    # right_numerator = serializers.IntegerField(allow_null=True)
-    # right_denominator =  serializers.IntegerField(allow_null=True)
-    # right_str = serializers.CharField(max_length=50, allow_null=True)
-    # cert_id = serializers.CharField(max_length=255, allow_null=True)
-    # related_creditor_regno = serializers.JSONField(allow_null=True)
-    # related_creditor_num = serializers.IntegerField(default=0)
-    # query_time = serializers.DateTimeField(default_timezone=tz)
-    # query_time_str = serializers.CharField(max_length=255, allow_null=True)
-    # create_time = serializers.DateTimeField(default_timezone=tz)
-    # is_valid = serializers.BooleanField(default=True)
-    # extra = serializers.JSONField(allow_null=True)
-
-    # declare_value = serializers.IntegerField(allow_null=True)
-    # declare_value_date = serializers.DateField(allow_null=True)
-    # declare_value_date_original = serializers.CharField(max_length=255, allow_null=True)
-    # old_value = serializers.JSONField(allow_null=True)
-    # land_value_remark = serializers.JSONField(allow_null=True)
-    # other_remark_str = serializers.JSONField(allow_null=True)
-    # restricted_type = serializers.ChoiceField(RestrictionTypeEnum.choices(), default=RestrictionTypeEnum.NONE)
-    # restricted_reason = serializers.JSONField(allow_null=True)
-
-    # class Meta:
-    #     list_serializer_class = FeedbackLborListSerializer
-
-    def create(self, validated_data):
-        # with transaction.atomic(): # 出錯直接重置
-        # _create_tp(validated_data)
-        return True 
-
 # 解析謄本用序列器(反序列)=======================================================
 class LandSerializerMarkVP(serializers.ModelSerializer):
     class Meta:

@@ -112,15 +112,6 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^http://127.0.0.1:\d+",
-    r".+www.vvips.com.tw/.+",
-]
-
-CORS_ALLOW_METHODS = [
-    "GET",
-]
-
 ROOT_URLCONF = 'lbor_v3.urls'
 
 TEMPLATES = [
